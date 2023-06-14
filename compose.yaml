@@ -1,0 +1,99 @@
+---
+
+services:
+
+  prometheus:
+    container_name: monitoring_prometheus
+    image: prom/prometheus:v2.44.0
+    command:
+      - "--config.file=/config/prometheus.yml"
+      - "--web.external-url=https://${PROMETHEUS_HOST}/"
+      # enable reload of configuration via POST request to '/-/reload/'
+      - "--web.enable-lifecycle"
+    networks:
+      - backend
+    volumes:
+      - ./prometheus:/config
+      - monitoring_prometheus_data:/prometheus
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`${PROMETHEUS_HOST}`)"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.tls.certresolver=leresolver"
+      - "traefik.http.routers.prometheus.middlewares=chain-whitelist@file,prometheus-auth"
+      - "traefik.http.middlewares.prometheus-auth.basicauth.users=${HTTP_AUTH_USER}"
+      - "traefik.port=9090"
+
+  grafana:
+    container_name: monitoring_grafana
+    image: grafana/grafana:10.0.0
+    networks:
+      - backend
+    volumes:
+      - monitoring_grafana_data:/var/lib/grafana
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`${GRAFANA_HOST}`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.tls.certresolver=leresolver"
+      - "traefik.http.routers.grafana.middlewares=chain-whitelist@file"
+      - "traefik.port=3000"
+
+  alertmanager:
+    container_name: monitoring_alertmanager
+    image: prom/alertmanager:v0.25.0
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+      - "--web.external-url=https://${ALERTMANAGER_HOST}/"
+    networks:
+      - backend
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+      - monitoring_alertmanager_data:/alertmanager
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.alertmanager.rule=Host(`${ALERTMANAGER_HOST}`)"
+      - "traefik.http.routers.alertmanager.entrypoints=websecure"
+      - "traefik.http.routers.alertmanager.tls=true"
+      - "traefik.http.routers.alertmanager.tls.certresolver=leresolver"
+      - "traefik.http.routers.alertmanager.middlewares=chain-whitelist@file,alertmanager-auth"
+      - "traefik.http.middlewares.alertmanager-auth.basicauth.users=${HTTP_AUTH_USER}"
+      - "traefik.port=9093"
+
+  cadvisor:
+    container_name: monitoring_cadvisor
+    image: google/cadvisor:v0.47.0
+    networks:
+      - backend
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    devices:
+      - /dev/kmsg:/dev/kmsg
+
+volumes:
+  monitoring_prometheus_data:
+    external: true
+  monitoring_grafana_data:
+    external: true
+  monitoring_alertmanager_data:
+    external: true
+
+networks:
+  backend:
+    external: true
+
+...
