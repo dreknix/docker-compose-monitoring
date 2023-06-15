@@ -1,0 +1,35 @@
+---
+
+global:
+  # How frequently to scrape targets by default (default = 1m).
+  scrape_interval: 1m
+
+  # How long until a scrape request times out (default = 10s).
+  scrape_timeout: 10s
+
+  # How frequently to evaluate rules (default = 1m).
+  evaluation_interval: 1m
+
+  # The labels to add to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  # external_labels:
+  #   monitor: 'example.org'
+
+# Rule files specifies a list of globs. Rules and alerts are read from
+# all matching files.
+rule_files:
+  - rules/*.rules.yml
+
+# Scrape config files specifies a list of globs. Scrape configs are read from
+# all matching files and appended to the list of scrape configs.
+scrape_config_files:
+  - scrape_configs/*.yml
+
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets:
+          - 'alertmanager:9093'
+
+...

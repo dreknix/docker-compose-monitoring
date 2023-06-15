@@ -1,2 +1,5 @@
 *
 !.gitignore
+!*.dist
+!rules/
+!scrape_configs/

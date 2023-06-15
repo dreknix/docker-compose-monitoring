@@ -1,0 +1,46 @@
+groups:
+
+- name: Instance is unreachable or >5 minutes
+  rules:
+  # Alert for any instance that is unreachable for >5 minutes
+  - alert: InstanceDown
+    expr: up == 0
+    for: 5m
+    labels:
+      severity: error
+    annotations:
+      summary: "Instance {{ $labels.instance }} down"
+      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+
+- name: Host has High CPU Load
+  rules:
+  - alert: HostHighCPULoad
+    expr: max(node_load1) by (instance) > (count by (instance)(node_cpu_seconds_total{mode="idle"}) * 0.7) 
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Host high CPU load (instance {{ $labels.instance }})"
+      description: "CPU load high\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+- name: Low Space on Disk
+  rules:
+  - alert: DiskLowSpace
+    expr: node_filesystem_free_bytes{mountpoint="/"}/node_filesystem_size_bytes{mountpoint="/"} < 0.15
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Low Disk Space (instance {{ $labels.instance }})"
+      description: "Low Disk Space\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+
+- name: High Temperature
+  rules:
+  - alert: HighTemperature
+    expr: max by (instance) (node_hwmon_temp_celsius) > 85.0
+    for: 5m
+    labels:
+      severity: error
+    annotations:
+      summary: "Temperature at {{ $labels.instance }} is to HIGH"
+      description: "Temperature at is to high\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"

@@ -1,0 +1,54 @@
+---
+
+# A scrape_config section specifies a set of targets and parameters describing
+# how to scrape them. In the general case, one scrape configuration specifies
+# a single job. In advanced configurations, this may change.
+scrape_configs:
+
+  # The job name assigned to scraped metrics by default.
+  - job_name: 'prometheus'
+
+    # How frequently to scrape targets from this job.
+    scrape_interval: 5s
+
+    # # The HTTP resource path on which to fetch metrics from targets.
+    # metrics_path: '/metrics'
+
+    # # Configures the protocol scheme used for requests.
+    # scheme: http
+
+    # # Sets the `Authorization` header on every scrape request with the
+    # # configured username and password.
+    # # password and password_file are mutually exclusive.
+    # basic_auth:
+    #   username: <string>
+    #   password: <secret>
+    #   password_file: <string>
+
+    # # Configure whether scrape requests follow HTTP 3xx redirects.
+    # follow_redirects: true
+
+    # # Whether to enable HTTP2.
+    # enable_http2: true
+
+    # A static_config allows specifying a list of targets and a common label
+    # set for them.
+    static_configs:
+      # The targets specified by the static config.
+      - targets:
+          - 'localhost:9090'
+        # Labels assigned to all metrics scraped from the targets.
+        labels:
+          hostname: 'prometheus.example.org'
+    
+    # Relabeling is a powerful tool to dynamically rewrite the label set of a
+    # target before it gets scraped. Multiple relabeling steps can be
+    # configured per scrape configuration. They are applied to the label set
+    # of each target in order of their appearance in the configuration file.
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)(:[0-9]+)?'
+        replacement: '${1}'
+
+...
