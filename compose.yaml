@@ -47,7 +47,7 @@ services:
 
   alertmanager:
     container_name: monitoring_alertmanager
-    image: prom/alertmanager:v0.25.0
+    image: prom/alertmanager:v0.26.0
     command:
       - "--config.file=/etc/alertmanager/alertmanager.yml"
       - "--storage.path=/alertmanager"
