@@ -4,7 +4,7 @@ services:
 
   prometheus:
     container_name: monitoring_prometheus
-    image: prom/prometheus:v3.7.3
+    image: prom/prometheus:v3.8.0
     command:
       - "--config.file=/config/prometheus.yml"
       - "--web.external-url=https://${PROMETHEUS_HOST}/"
