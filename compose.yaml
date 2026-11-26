@@ -71,7 +71,7 @@ services:
 
   cadvisor:
     container_name: monitoring_cadvisor
-    image: google/cadvisor:v0.47.0
+    image: ghcr.io/google/cadvisor:v0.61.1
     networks:
       - backend
     volumes:
